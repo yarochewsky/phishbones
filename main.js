@@ -15,12 +15,12 @@ const logger = winston.createLogger({
     ]
 });
 
-if (process.env.URL == null) {
+if (process.env.URL == "") {
     logger.warn('you need an entrypoint url');
     process.exit();
 }
 
-if (process.env.ASSETS == null) {
+if (process.env.ASSETS == "") {
     logger.warn('you need an assets folder to save screenshots to');
     process.exit(); 
 }
