@@ -1,0 +1,46 @@
+package main
+
+// TODO: scan hosts on network for the same IOC of a given attack
+//		 (file hashes, browser history, email attachments, emails opened, etc.)
+
+// TODO: Find IPs/domains that the attack uses and figure out which sockets on the computer
+// 		 are communicating with that C&C
+
+// TODO: Identify files that may have been downloaded as a result of the attack
+
+// TODO: Generate metadata and "crime signature/post mortem" as a PR advisory to be distributed
+// 		 to users of org/internet
+
+// TODO: Original email files can indicate origin of attacker, domain, common signatures, etc
+//		 (Remember Bloodstain is supposed to keep its own score of known attacks and build a network
+//        that can learn from itself based on its customer base)
+
+// TODO: "Forward-as-attachment" capabilities on email clients can export an entire entrypoint phishing
+//		 with headers and everything necessary for initial automated analysis and correlating a particular
+// 	     message with a wider campaign or ring
+
+// TODO: maybe should explore opening phishing in docker container or vm server, and also use
+//       bpf, network monitoring for syscalls, processes spawned, and network/dns resolution
+//		 (Cuckoo is a good framework, open-source, which we can leverage for fast, automated analysis)
+
+// Remember we have access to the supposedly targeted machine: its IP, geolocation, user agent, etc.
+// Or we can take input from the user for these data if we don't - this is a post-mortem incident
+// response tool, not detection! Then with these, we can simulate the attack again in a sandbox env
+// (clear cookies if needed), and crawl the phishing attack payloads. We can then render and de-weaponize
+// them, showing our customer what happened, how, and possibly who did it.
+
+// VM Sandbox: Choose from a pool of pre-deployed cloud machines, pre-firewalled to block all outgoing
+// traffic except DNS. Open links, run attack. Report results to server, teardown machine.
+// Figure out custom protocol for collecting results and allow that as well on firewall, but also need
+// to model threats on this server-sandbox communication. Can the attacker compromise my infra?
+
+// When an attack implementes evasion techniques, they can:
+//	- make sure it only opens for an ip or ip range
+//  - make sure it only opens for a geolocation
+//  - autodestruct (present a 404, 302) on a target ip after it was seen once
+//  - autodestruct on a cookie
+
+// We need to make sure to address all the above cases and more!
+
+// Think about creating this tool to output useful and rich IOCs to go on with the hunt and move to
+// fs and network analysis if the vector deployed malware...

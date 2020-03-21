@@ -1,0 +1,19 @@
+{
+  "name": "phishbones",
+  "version": "1.0.0",
+  "description": "summarize phishing attack",
+  "main": "main.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "main": "node main.js"
+  },
+  "author": "Daniel Fonseca Yarochewsky",
+  "license": "ISC",
+  "dependencies": {
+    "puppeteer": "^2.1.1",
+    "winston": "^3.2.1"
+  }
+}
