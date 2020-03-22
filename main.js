@@ -1,11 +1,13 @@
 const puppeteer = require("puppeteer");
 const winston = require("winston");
+const uuid = require("uuid");
+
 
 const Attack = require('./lib/attack');
 const PSError = require("./lib/ps_error");
 
 // TODO: code coverage
-// TODO: implement user agent/cookies setting 
+// TODO: implement user agent/cookies/geolocation setting
 // TODO: iframes
 // TODO: may get cookies for other urls
 
@@ -33,7 +35,7 @@ const url = process.env.URL;
     try {
         logger.info(`initiating page acquisition for ${url}`)
         const attack = await summarizeAttack(browser, url, path);
-        attack.children.forEach((child) => {
+        attack.children.forEach(child => {
             console.log(child.url);
         });
     } catch(e) {
@@ -45,13 +47,20 @@ const url = process.env.URL;
 
 const summarizeAttack = async (browser, url, path) => {
     const attack = await gatherPageData(browser, url, path);
-
-    await Promise.all(attack.requests.map(async (req) => {
-        logger.info(`=> fetching ${req}`);
-        const child = await gatherPageData(browser, req, path);
-        attack.addChild(child);
-    }));
-
+    const childrenPromises = await attack.requests.map(async req => {
+        logger.info(`=> page acquisition for ${req}`)
+        try {
+            return await gatherPageData(browser, req, path);
+        } catch (err) {
+            logger.error("err resolving chilld: ", err);
+        }
+    });
+    const children = await Promise.all(childrenPromises);
+    children.forEach(child => {
+        if (child != null) {
+            attack.addChild(child);
+        }
+    });
     return attack;
 };
 
@@ -125,15 +134,16 @@ const gatherPageData = async (browser, url, path) => {
                 links: links,
                 javascriptCode: jsCode,
                 javascriptFilepaths: jsFilenames,
-                phpRefs: phpRefs
+                phpRefs: phpRefs,
             };
         });
-        await page.screenshot({path: `${path}/${urlEscapeFull(url)}.png`, fullPage: true});
+        const metrics = await page.metrics();
+        await page.screenshot({path: `${path}/${uuid.v1()}.png`, fullPage: true});
         
         const cookies = await page.cookies();
         const htmlDump = await page.content();
-
-        return new Attack(urlDeweaponize(url), pageData, requests, securityCerts, cookies, htmlDump)
+        await page.close();
+        return new Attack(urlDeweaponize(url), pageData, requests, securityCerts, cookies, htmlDump, metrics)
     } catch (err) {
         throw new PSError(err, 'could not resolve attack');
     }
