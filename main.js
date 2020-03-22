@@ -35,9 +35,7 @@ const url = process.env.URL;
     try {
         logger.info(`initiating page acquisition for ${url}`)
         const attack = await summarizeAttack(browser, url, path);
-        attack.children.forEach(child => {
-            console.log(child.url);
-        });
+        console.log(JSON.stringify(attack));
     } catch(e) {
         logger.warn("error: ", e);
     } finally {
@@ -93,16 +91,22 @@ const gatherPageData = async (browser, url, path) => {
         await page.goto(url, { waitUntil: 'networkidle2'});
         const pageData = await page.evaluate(() => {
 
-            const links = Array.from(document.querySelectorAll("link"), (link) => {
+            const links = Array.from(document.querySelectorAll("link"), link => {
                 return {
                     rel: link.rel,
                     href: link.href
                 };
             });
 
+            const anchors = Array.from(document.querySelectorAll("a", link => {
+                return {
+                    href: link.href
+                }
+            }));           
+
             const jsFilenames = [];
             const jsCode = [];
-            document.querySelectorAll("script").forEach((jsTag) => {
+            document.querySelectorAll("script").forEach(jsTag => {
                 if (jsTag.src == "") {
                     // inline js; append code
                     jsCode.push(jsTag.text);
@@ -112,8 +116,8 @@ const gatherPageData = async (browser, url, path) => {
                 }
             });
 
-            const phpRefs = Array.from(document.querySelectorAll("form[action]"), (form) => {
-                const inputs = Array.from(form.querySelectorAll("input"), (input) => {
+            const phpRefs = Array.from(document.querySelectorAll("form[action]"), form => {
+                const inputs = Array.from(form.querySelectorAll("input"), input => {
                     return {
                         type: input.type,
                         name: input.name
